@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Portfólio de Victor Véras com agentes de IA e automações em n8n para WhatsApp, ClickUp e Instagram.">
+<meta property="og:title" content="Victor Véras Automações">
+<meta property="og:description" content="Seis casos de agentes de IA e automações em produção, do problema ao que está rodando.">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Victor Véras Automações</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: coluna única de leitura, cada caso é uma ficha com metadados à esquerda e um traçado de nós como o canvas de um workflow */
+:root {
+  --bg: #F1F3F0;
+  --surface: #FAFBF9;
+  --fg: #18201C;
+  --muted: #5A665F;
+  --line: #D3D9D4;
+  --accent: #2B47C9;
+  --accent-soft: #E3E8FB;
+  --k-gatilho: #C27A12;
+  --k-ia: #7442C8;
+  --k-dado: #12807A;
+  --k-codigo: #4F5D66;
+  --k-envio: #2F8A3E;
+  --k-humano: #B83F5E;
+  --f-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111513; --surface: #181D1A; --fg: #E3E8E4; --muted: #9AA59F; --line: #2C3430;
+    --accent: #93A6FF; --accent-soft: #1E2645;
+    --k-gatilho: #E3A548; --k-ia: #B08CF0; --k-dado: #4CC2BA; --k-codigo: #A3B1BA; --k-envio: #6DCB7B; --k-humano: #EE8AA3;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111513; --surface: #181D1A; --fg: #E3E8E4; --muted: #9AA59F; --line: #2C3430;
+  --accent: #93A6FF; --accent-soft: #1E2645;
+  --k-gatilho: #E3A548; --k-ia: #B08CF0; --k-dado: #4CC2BA; --k-codigo: #A3B1BA; --k-envio: #6DCB7B; --k-humano: #EE8AA3;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--f-body);
+  font-size: 1rem;
+  line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 68rem; margin: 0 auto; padding-block: 3.5rem 4rem; display: grid; gap: 4.5rem; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; line-height: 1.1; }
+p { margin: 0; }
+a { color: var(--accent); }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+
+.eyebrow {
+  font-family: var(--f-mono); font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+}
+
+/* Abertura */
+.hero { display: grid; gap: 1.5rem; }
+.hero h1 { font-size: clamp(2.6rem, 7vw, 4.75rem); font-weight: 800; letter-spacing: -.02em; }
+.hero h1 span { color: var(--accent); }
+.hero .lede { font-size: clamp(1.1rem, 2.2vw, 1.3rem); max-width: 40rem; color: var(--fg); }
+.contact { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; font-family: var(--f-mono); font-size: .875rem; color: var(--muted); }
+.contact b { color: var(--fg); font-weight: 500; }
+
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-block: 1px solid var(--line); }
+.stat { padding: 1.25rem 1rem 1.25rem 0; display: grid; gap: .25rem; }
+.stat + .stat { padding-left: 1rem; border-left: 1px solid var(--line); }
+.stat strong { font-family: var(--f-display); font-size: 2.1rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; }
+.stat span { font-size: .875rem; color: var(--muted); }
+
+/* Legenda dos tipos de nó */
+.legend { display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; font-family: var(--f-mono); font-size: .75rem; color: var(--muted); }
+.legend i, .node i { display: inline-block; width: .6rem; height: .6rem; border-radius: 2px; background: var(--k); flex: none; }
+.legend span { display: inline-flex; align-items: center; gap: .4rem; }
+
+/* Casos */
+.cases { display: grid; gap: 1.5rem; }
+.cases-head { display: grid; gap: .75rem; }
+.cases-head h2 { font-size: clamp(1.8rem, 4vw, 2.5rem); }
+.case {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+  display: grid; grid-template-columns: 15rem minmax(0, 1fr);
+}
+.case-meta { padding: 1.75rem; border-right: 1px solid var(--line); display: grid; align-content: start; gap: 1.25rem; }
+.case-meta .num { font-family: var(--f-mono); font-size: .8rem; color: var(--accent); }
+.case-meta dl { margin: 0; display: grid; gap: .9rem; }
+.case-meta dt { font-family: var(--f-mono); font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.case-meta dd { margin: .15rem 0 0; font-size: .9rem; }
+.status { display: inline-flex; align-items: center; gap: .4rem; font-family: var(--f-mono); font-size: .75rem; padding: .2rem .55rem; border-radius: 99px; border: 1px solid var(--line); }
+.status::before { content: ""; width: .45rem; height: .45rem; border-radius: 50%; background: var(--k-envio); }
+.status.paused::before { background: var(--k-gatilho); }
+
+.case-body { padding: 1.75rem 2rem 2rem; display: grid; gap: 1.5rem; min-width: 0; }
+.case-body h3 { font-size: clamp(1.35rem, 2.6vw, 1.7rem); font-weight: 700; }
+.case-body section { display: grid; gap: .5rem; max-width: 42rem; }
+.case-body h4 { margin: 0; font-family: var(--f-mono); font-size: .75rem; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.case-body ul { margin: 0; padding-left: 1.1rem; display: grid; gap: .45rem; }
+.case-body li::marker { color: var(--accent); }
+.result { border-left: 3px solid var(--accent); padding: .25rem 0 .25rem 1rem; font-weight: 500; max-width: 42rem; }
+
+/* Traçado de nós, imitando a leitura de um canvas de workflow */
+.flow-box { overflow-x: auto; border: 1px dashed var(--line); border-radius: 8px; padding: 1rem; background: var(--bg); }
+.flow { display: flex; flex-wrap: wrap; align-items: center; gap: .55rem .35rem; }
+.node {
+  display: inline-flex; align-items: center; gap: .45rem;
+  font-family: var(--f-mono); font-size: .78rem; line-height: 1.3;
+  background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--k);
+  border-radius: 6px; padding: .4rem .6rem;
+}
+.arrow { color: var(--muted); font-family: var(--f-mono); font-size: .8rem; }
+.branch { margin-top: .75rem; padding-top: .75rem; border-top: 1px dashed var(--line); display: flex; flex-wrap: wrap; align-items: center; gap: .55rem .35rem; }
+.branch > .eyebrow { margin-right: .35rem; }
+[data-k="gatilho"] { --k: var(--k-gatilho); }
+[data-k="ia"] { --k: var(--k-ia); }
+[data-k="dado"] { --k: var(--k-dado); }
+[data-k="codigo"] { --k: var(--k-codigo); }
+[data-k="envio"] { --k: var(--k-envio); }
+[data-k="humano"] { --k: var(--k-humano); }
+
+/* Outros projetos e bastidores */
+.block { display: grid; gap: 1.5rem; }
+.block > h2 { font-size: clamp(1.6rem, 3.5vw, 2.2rem); }
+.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border-top: 1px solid var(--line); }
+.grid article { padding: 1.25rem 1.25rem 1.25rem 0; border-bottom: 1px solid var(--line); display: grid; gap: .35rem; align-content: start; }
+.grid article:not(:nth-child(3n+1)) { padding-left: 1.25rem; border-left: 1px solid var(--line); }
+.grid h3 { font-size: 1.05rem; font-weight: 700; }
+.grid p { font-size: .92rem; color: var(--muted); }
+
+.stack { display: flex; flex-wrap: wrap; gap: .5rem; }
+.stack span { font-family: var(--f-mono); font-size: .8rem; padding: .3rem .65rem; border-radius: 6px; background: var(--accent-soft); color: var(--fg); }
+
+footer { border-top: 1px solid var(--line); padding-top: 1.5rem; display: grid; gap: .5rem; color: var(--muted); font-size: .9rem; }
+
+@media (max-width: 860px) {
+  .case { grid-template-columns: minmax(0, 1fr); }
+  .case-meta { border-right: 0; border-bottom: 1px solid var(--line); padding: 1.25rem; }
+  .case-meta dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .case-body { padding: 1.25rem; }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid article:not(:nth-child(3n+1)) { padding-left: 0; border-left: 0; }
+  .grid article:nth-child(2n) { padding-left: 1.25rem; border-left: 1px solid var(--line); }
+}
+@media (max-width: 560px) {
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stat:nth-child(3) { padding-left: 0; border-left: 0; }
+  .stat:nth-child(n+3) { border-top: 1px solid var(--line); }
+  .grid { grid-template-columns: minmax(0, 1fr); }
+  .grid article:nth-child(2n) { padding-left: 0; border-left: 0; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .node { transition: transform .15s ease; }
+  .node:hover { transform: translateY(-2px); }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="hero">
+    <p class="eyebrow">Portfólio de automação e agentes de IA</p>
+    <h1>Victor Véras<span>.</span></h1>
+    <p class="lede">Construo agentes de IA que atendem, vendem e cobram pelo WhatsApp, e automações que tiram trabalho repetido da equipe. Tudo abaixo roda ou rodou em produção para empresas reais, com nomes omitidos a pedido dos clientes.</p>
+    <div class="contact">
+      <span>E-mail <b>viczveras1@gmail.com</b></span>
+      <span>LinkedIn <a href="https://www.linkedin.com/in/victorveras1">linkedin.com/in/victorveras1</a></span>
+      <span>GitHub <a href="https://github.com/viczveras">github.com/viczveras</a></span>
+      <span>João Pessoa, PB</span>
+    </div>
+  </header>
+
+  <div class="stats" role="list">
+    <div class="stat" role="listitem"><strong>17</strong><span>empresas atendidas</span></div>
+    <div class="stat" role="listitem"><strong>8</strong><span>agentes de IA em produção hoje</span></div>
+    <div class="stat" role="listitem"><strong>~600</strong><span>execuções por dia no agente mais movimentado</span></div>
+    <div class="stat" role="listitem"><strong>13</strong><span>meses de operação contínua</span></div>
+  </div>
+
+  <div class="cases">
+    <div class="cases-head">
+      <p class="eyebrow">Casos</p>
+      <h2>Seis projetos, do problema ao que está rodando</h2>
+      <div class="legend" aria-label="Tipos de etapa nos diagramas">
+        <span data-k="gatilho"><i></i>gatilho</span>
+        <span data-k="ia"><i></i>modelo de IA</span>
+        <span data-k="dado"><i></i>banco e memória</span>
+        <span data-k="codigo"><i></i>regra em código</span>
+        <span data-k="envio"><i></i>envio</span>
+        <span data-k="humano"><i></i>pessoa da equipe</span>
+      </div>
+    </div>
+
+    <!-- Caso 1 -->
+    <article class="case" id="perfumaria">
+      <aside class="case-meta">
+        <span class="num">Caso 1</span>
+        <dl>
+          <div><dt>Segmento</dt><dd>Perfumaria com loja e revenda</dd></div>
+          <div><dt>Canal</dt><dd>WhatsApp</dd></div>
+          <div><dt>Desde</dt><dd>out/2025</dd></div>
+          <div><dt>Tamanho</dt><dd>112 nós</dd></div>
+        </dl>
+        <span class="status">em produção</span>
+      </aside>
+      <div class="case-body">
+        <h3>Vendedora no WhatsApp para cliente final e revendedora</h3>
+        <section>
+          <h4>Problema</h4>
+          <p>A loja atendia consumidor e revendedora no mesmo número. Pergunta de preço, pedido de catálogo e cadastro de revenda chegavam a qualquer hora e ficavam esperando alguém da equipe.</p>
+        </section>
+        <section>
+          <h4>Solução</h4>
+          <p>Duas agentes com papéis separados. Um roteador lê a conversa e entrega para a persona de varejo ou para a de revenda. A busca de produto consulta um catálogo vetorizado em Postgres, atualizado a partir da planilha da loja a cada 12 horas. Quando o cliente quer fechar, a IA pausa e a equipe assume a conversa.</p>
+        </section>
+        <div class="flow-box" role="img" aria-label="Fluxo do agente de perfumaria">
+          <div class="flow">
+            <span class="node" data-k="gatilho"><i></i>Mensagem no WhatsApp</span><span class="arrow">→</span>
+            <span class="node" data-k="dado"><i></i>Buffer e pausa no Redis</span><span class="arrow">→</span>
+            <span class="node" data-k="ia"><i></i>Áudio e foto viram texto</span><span class="arrow">→</span>
+            <span class="node" data-k="ia"><i></i>Roteador varejo ou revenda</span><span class="arrow">→</span>
+            <span class="node" data-k="dado"><i></i>Busca no catálogo vetorial</span><span class="arrow">→</span>
+            <span class="node" data-k="ia"><i></i>Agente da persona</span><span class="arrow">→</span>
+            <span class="node" data-k="codigo"><i></i>Guarda de preço</span><span class="arrow">→</span>
+            <span class="node" data-k="envio"><i></i>Resposta em balões</span>
+          </div>
+          <div class="branch">
+            <span class="eyebrow">ramos</span>
+            <span class="node" data-k="envio"><i></i>Catálogo e tabela de revenda</span>
+            <span class="node" data-k="envio"><i></i>Follow-up de cadastro</span>
+            <span class="node" data-k="humano"><i></i>Fechamento com a equipe</span>
+          </div>
+        </div>
+        <section>
+          <h4>Decisões técnicas</h4>
+          <ul>
+            <li>Preço só sai do catálogo. Uma guarda em código bloqueia valor em reais que não veio da consulta, porque a regra escrita no prompt não segurou sozinha.</li>
+            <li>Mensagens picadas são agrupadas num buffer e cada contato tem pausa própria, para a IA não responder por cima da equipe.</li>
+            <li>Suíte de testes local que roda o código real dos nós com dados simulados, 742 asserções, executada antes de cada publicação, mais um ambiente de staging separado.</li>
+            <li>Troca de provedor de WhatsApp duas vezes ao longo do projeto sem reescrever o agente.</li>
+          </ul>
+        </section>
+        <p class="result">Atendimento 24 horas há 12 meses, com cerca de 45 ajustes entregues a partir do retorno da cliente.</p>
+      </div>
+    </article>
+
+    <!-- Caso 2 -->
+    <article class="case" id="clinica">
+      <aside class="case-meta">
+        <span class="num">Caso 2</span>
+        <dl>
+          <div><dt>Segmento</dt><dd>Clínica com dois profissionais</dd></div>
+          <div><dt>Canal</dt><dd>WhatsApp</dd></div>
+          <div><dt>Desde</dt><dd>mar/2026</dd></div>
+          <div><dt>Tamanho</dt><dd>89 nós</dd></div>
+        </dl>
+        <span class="status">em produção</span>
+      </aside>
+      <div class="case-body">
+        <h3>Triagem e pré-cadastro de pacientes</h3>
+        <section>
+          <h4>Problema</h4>
+          <p>A recepção respondia WhatsApp e cuidava da agenda ao mesmo tempo. Paciente novo e paciente de retorno pediam caminhos diferentes, e o encaminhamento para exame de imagem era montado à mão.</p>
+        </section>
+        <section>
+          <h4>Solução</h4>
+          <p>Um agente reconhece se a pessoa já é paciente da casa, coleta os dados da ficha, manda um resumo para a recepção e pausa a conversa para a equipe marcar o horário. Um microserviço gera o PDF de encaminhamento. Um relatório diário mostra o volume de conversas.</p>
+        </section>
+        <div class="flow-box" role="img" aria-label="Fluxo do agente da clínica">
+          <div class="flow">
+            <span class="node" data-k="gatilho"><i></i>Mensagem no WhatsApp</span><span class="arrow">→</span>
+            <span class="node" data-k="codigo"><i></i>Filtro de grupo e eco</span><span class="arrow">→</span>
+            <span class="node" data-k="ia"><i></i>Mídia vira texto</span><span class="arrow">→</span>
+            <span class="node" data-k="dado"><i></i>Pausa geral e por paciente</span><span class="arrow">→</span>
+            <span class="node" data-k="dado"><i></i>Buffer de 20 s</span><span class="arrow">→</span>
+            <span class="node" data-k="dado"><i></i>Ficha do paciente</span><span class="arrow">→</span>
+            <span class="node" data-k="ia"><i></i>Agente de triagem</span><span class="arrow">→</span>
+            <span class="node" data-k="codigo"><i></i>Filtro de raciocínio</span><span class="arrow">→</span>
+            <span class="node" data-k="envio"><i></i>Resposta</span>
+          </div>
+          <div class="branch">
+            <span class="eyebrow">ferramentas</span>
+            <span class="node" data-k="dado"><i></i>Salvar ficha</span>
+            <span class="node" data-k="envio"><i></i>PDF de encaminhamento</span>
+            <span class="node" data-k="humano"><i></i>Resumo para a recepção</span>
+          </div>
+        </div>
+        <section>
+          <h4>Decisões técnicas</h4>
+          <ul>
+            <li>Um filtro em código remove o raciocínio interno antes do envio, depois de um caso em que o modelo mandou a própria análise para o paciente.</li>
+            <li>O agente não confirma consulta. Os dois profissionais têm grades diferentes e a decisão ficou com a recepção até existir uma agenda confiável como fonte.</li>
+            <li>Próxima etapa desenhada com agendamento pelo agente, Postgres como fonte da verdade com trava contra horário sobreposto e Google Calendar como espelho.</li>
+          </ul>
+        </section>
+        <p class="result">Recepção recebe o paciente já identificado e com a ficha preenchida.</p>
+      </div>
+    </article>
+
+    <!-- Caso 3 -->
+    <article class="case" id="auditivos">
+      <aside class="case-meta">
+        <span class="num">Caso 3</span>
+        <dl>
+          <div><dt>Segmento</dt><dd>Rede de aparelhos auditivos com várias unidades</dd></div>
+          <div><dt>Canal</dt><dd>WhatsApp</dd></div>
+          <div><dt>Desde</dt><dd>abr/2026</dd></div>
+          <div><dt>Volume</dt><dd>~600 execuções por dia</dd></div>
+        </dl>
+        <span class="status">em produção</span>
+      </aside>
+      <div class="case-body">
+        <h3>Atendimento com agente e régua de cobrança por unidade</h3>
+        <section>
+          <h4>Problema</h4>
+          <p>A rede precisava responder lead e paciente o dia todo em várias cidades e lembrar vencimento de boleto e Pix sem a equipe financeira ligar para cada pessoa.</p>
+        </section>
+        <section>
+          <h4>Solução</h4>
+          <p>Um agente qualifica o contato, orienta sobre audiometria e transfere para humano quando precisa. Em paralelo, uma régua de cobrança roda em horário comercial para cada unidade, avisa antes e no dia do vencimento e escuta as respostas de confirmação e de saída da lista.</p>
+        </section>
+        <div class="flow-box" role="img" aria-label="Fluxo da régua de cobrança">
+          <div class="flow">
+            <span class="node" data-k="gatilho"><i></i>Agenda das 9h às 16h</span><span class="arrow">→</span>
+            <span class="node" data-k="dado"><i></i>Títulos por unidade</span><span class="arrow">→</span>
+            <span class="node" data-k="codigo"><i></i>Valida boleto e Pix</span><span class="arrow">→</span>
+            <span class="node" data-k="codigo"><i></i>Limite por envio e por dia</span><span class="arrow">→</span>
+            <span class="node" data-k="envio"><i></i>Lembrete D-2 e D-0</span><span class="arrow">→</span>
+            <span class="node" data-k="gatilho"><i></i>Escuta SIM e saída</span>
+          </div>
+        </div>
+        <section>
+          <h4>Decisões técnicas</h4>
+          <ul>
+            <li>O custo do agente vinha de um prompt de 21 KB reenviado inteiro a cada mensagem. Reordenei os blocos para o cache da OpenAI e a parte estável subiu de 554 para 4.869 tokens, sem mudar nenhuma regra.</li>
+            <li>Modelo escolhido por teste. Um harness de replay com 23 conversas reais em três rodadas comparou modelos antes de qualquer troca em produção.</li>
+            <li>Uma regra que o modelo ignorava virou bloco próprio com gatilho explícito, resposta pronta e trava no ponto da ação.</li>
+            <li>O WhatsApp derrubava a sessão de cobrança. A leitura do corpo da resposta mostrou bloqueio do provedor para cobrança como primeira mensagem a número sem histórico. A régua passou a abrir com um convite para responder SIM.</li>
+          </ul>
+        </section>
+        <p class="result">Agente custa cerca de US$ 4 por mês em modelo, com cerca de 48% de acerto de cache.</p>
+      </div>
+    </article>
+
+    <!-- Caso 4 -->
+    <article class="case" id="abre-task">
+      <aside class="case-meta">
+        <span class="num">Caso 4</span>
+        <dl>
+          <div><dt>Segmento</dt><dd>Agência de comunicação</dd></div>
+          <div><dt>Canal</dt><dd>WhatsApp e ClickUp</dd></div>
+          <div><dt>Desde</dt><dd>jun/2026</dd></div>
+          <div><dt>Tamanho</dt><dd>54 nós</dd></div>
+        </dl>
+        <span class="status">em produção</span>
+      </aside>
+      <div class="case-body">
+        <h3>Tarefa aberta por mensagem ou áudio no WhatsApp</h3>
+        <section>
+          <h4>Problema</h4>
+          <p>Pedidos de arte e demandas internas chegavam em áudio e mensagem solta no WhatsApp do gestor e se perdiam antes de virar tarefa.</p>
+        </section>
+        <section>
+          <h4>Solução</h4>
+          <p>O gestor escreve <code>/task</code> ou manda um áudio. Um roteador por comando envia para o agente, que transcreve e monta o rascunho com cliente, responsável, prioridade e prazo. Depois do "sim", a tarefa nasce no ClickUp com os campos preenchidos e o responsável é avisado.</p>
+        </section>
+        <div class="flow-box" role="img" aria-label="Fluxo do Abre-Task">
+          <div class="flow">
+            <span class="node" data-k="gatilho"><i></i>Mensagem no WhatsApp</span><span class="arrow">→</span>
+            <span class="node" data-k="codigo"><i></i>Roteador por comando</span><span class="arrow">→</span>
+            <span class="node" data-k="codigo"><i></i>Números autorizados</span><span class="arrow">→</span>
+            <span class="node" data-k="ia"><i></i>Áudio, imagem e PDF viram texto</span><span class="arrow">→</span>
+            <span class="node" data-k="ia"><i></i>Agente monta o rascunho</span><span class="arrow">→</span>
+            <span class="node" data-k="codigo"><i></i>Confirmação montada em código</span><span class="arrow">→</span>
+            <span class="node" data-k="humano"><i></i>Gestor responde sim</span><span class="arrow">→</span>
+            <span class="node" data-k="envio"><i></i>Tarefa criada no ClickUp</span>
+          </div>
+        </div>
+        <section>
+          <h4>Decisões técnicas</h4>
+          <ul>
+            <li>A mensagem de confirmação sai do rascunho gravado, montada por código e não pelo modelo. O gestor aprova exatamente o texto que vai para o ClickUp.</li>
+            <li>Regra de fidelidade no prompt e temperatura zero, porque pedido de cliente não pode ganhar detalhe inventado.</li>
+            <li>Uma variante atende a fila de produção de arte, com 66 clientes no campo de cliente e etiqueta por designer.</li>
+          </ul>
+        </section>
+        <p class="result">Pedido que antes ficava no histórico do WhatsApp vira tarefa atribuída, e o responsável é avisado na hora.</p>
+      </div>
+    </article>
+
+    <!-- Caso 5 -->
+    <article class="case" id="caca-leads">
+      <aside class="case-meta">
+        <span class="num">Caso 5</span>
+        <dl>
+          <div><dt>Segmento</dt><dd>Prospecção comercial B2B</dd></div>
+          <div><dt>Canal</dt><dd>Google Maps e WhatsApp</dd></div>
+          <div><dt>Desde</dt><dd>mar/2026</dd></div>
+          <div><dt>Partes</dt><dd>4 workflows</dd></div>
+        </dl>
+        <span class="status paused">pausado pelo comercial</span>
+      </aside>
+      <div class="case-body">
+        <h3>Prospecção automática a partir do Google Maps</h3>
+        <section>
+          <h4>Problema</h4>
+          <p>Levantar pequenas empresas por região e fazer o primeiro contato tomava horas do time comercial toda semana.</p>
+        </section>
+        <section>
+          <h4>Solução</h4>
+          <p>Com um comando <code>/lead</code> no WhatsApp, o fluxo busca empresas por segmento e cidade no Google Maps, grava numa planilha, faz a primeira abordagem e segue com follow-up no segundo, terceiro e quarto dia para quem não respondeu. O gestor recebe um resumo diário.</p>
+        </section>
+        <div class="flow-box" role="img" aria-label="Fluxo do Caça-Leads">
+          <div class="flow">
+            <span class="node" data-k="gatilho"><i></i>Comando /lead</span><span class="arrow">→</span>
+            <span class="node" data-k="codigo"><i></i>Raspagem no Google Maps</span><span class="arrow">→</span>
+            <span class="node" data-k="dado"><i></i>Planilha de leads</span><span class="arrow">→</span>
+            <span class="node" data-k="envio"><i></i>Primeiro contato</span><span class="arrow">→</span>
+            <span class="node" data-k="envio"><i></i>Follow-up D2, D3 e D4</span><span class="arrow">→</span>
+            <span class="node" data-k="humano"><i></i>Resumo diário ao gestor</span>
+          </div>
+        </div>
+        <section>
+          <h4>Decisões técnicas</h4>
+          <ul>
+            <li>Separado em quatro workflows (principal, raspagem, primeiro contato e follow-up) para pausar ou ajustar uma etapa sem parar as outras.</li>
+            <li>Na versão 2.0 o estado de cada lead passou para a planilha, que vira o painel do comercial e a fonte do follow-up.</li>
+          </ul>
+        </section>
+        <p class="result">Prospecção por região sem trabalho manual, com o comercial entrando só nas respostas.</p>
+      </div>
+    </article>
+
+    <!-- Caso 6 -->
+    <article class="case" id="instagram">
+      <aside class="case-meta">
+        <span class="num">Caso 6</span>
+        <dl>
+          <div><dt>Segmento</dt><dd>Marketing da própria empresa</dd></div>
+          <div><dt>Canal</dt><dd>Instagram e WhatsApp</dd></div>
+          <div><dt>Desde</dt><dd>jul/2026</dd></div>
+          <div><dt>Partes</dt><dd>2 workflows</dd></div>
+        </dl>
+        <span class="status">em produção</span>
+      </aside>
+      <div class="case-body">
+        <h3>Post de Instagram com aprovação humana pelo WhatsApp</h3>
+        <section>
+          <h4>Problema</h4>
+          <p>O perfil ficava parado por falta de tempo para pensar pauta, criar arte e escrever legenda.</p>
+        </section>
+        <section>
+          <h4>Solução</h4>
+          <p>O fluxo sugere três pautas, o gestor escolhe uma pelo WhatsApp, a IA gera arte e legenda, o gestor aprova e o post é publicado. O workflow fica esperando a resposta humana em cada etapa e retoma de onde parou.</p>
+        </section>
+        <div class="flow-box" role="img" aria-label="Fluxo do Instagram com aprovação">
+          <div class="flow">
+            <span class="node" data-k="gatilho"><i></i>Agenda</span><span class="arrow">→</span>
+            <span class="node" data-k="dado"><i></i>Histórico de posts</span><span class="arrow">→</span>
+            <span class="node" data-k="ia"><i></i>Três sugestões de pauta</span><span class="arrow">→</span>
+            <span class="node" data-k="humano"><i></i>Gestor escolhe</span><span class="arrow">→</span>
+            <span class="node" data-k="ia"><i></i>Arte e legenda</span><span class="arrow">→</span>
+            <span class="node" data-k="humano"><i></i>Gestor aprova</span><span class="arrow">→</span>
+            <span class="node" data-k="envio"><i></i>Publicação</span>
+          </div>
+        </div>
+        <section>
+          <h4>Decisões técnicas</h4>
+          <ul>
+            <li>Cada sugestão sorteia segmento, solução e ângulo, porque sem isso o modelo convergia sempre para a mesma ideia. O prompt proíbe slogan e estatística inventada.</li>
+            <li>Dois workflows. Um gera e espera, o outro recebe a resposta no WhatsApp e retoma a execução pela URL guardada em tabela.</li>
+          </ul>
+        </section>
+        <p class="result">Perfil com publicação recorrente, e nenhum post sai sem aprovação do gestor.</p>
+      </div>
+    </article>
+  </div>
+
+  <section class="block">
+    <p class="eyebrow">Outros projetos</p>
+    <h2>Mais agentes e automações</h2>
+    <div class="grid">
+      <article><h3>Agentes de atendimento</h3><p>Para academia, escola infantil, escola de cursos, faculdade EAD, loja de material de construção, loja esportiva e barbearia com agendamento via API do sistema da casa.</p></article>
+      <article><h3>Contrato automatizado</h3><p>Formulário vira contrato preenchido, segue para assinatura digital e, depois de assinado, atualiza o cadastro do cliente.</p></article>
+      <article><h3>Cobrança com Asaas</h3><p>Agendador diário, escuta de pagamento recebido e alerta ao gestor no vencimento.</p></article>
+      <article><h3>Resumo semanal da equipe</h3><p>Segunda grava o plano a partir do ClickUp, sexta compara com o que foi entregue e manda o fechamento no WhatsApp.</p></article>
+      <article><h3>Monitoramento dos agentes</h3><p>Contagem e resumo de erros de todos os fluxos, com limpeza automática das tabelas de controle de conversa.</p></article>
+      <article><h3>Agente no Telegram</h3><p>Assistente com base de conhecimento e postagem automática em redes sociais para uma comunidade online.</p></article>
+    </div>
+  </section>
+
+  <section class="block">
+    <p class="eyebrow">Bastidores</p>
+    <h2>Infraestrutura e operação</h2>
+    <div class="grid">
+      <article><h3>Migração de WhatsApp</h3><p>Instâncias migradas de um provedor terceirizado para Evolution API em servidor próprio e depois para uazapi.</p></article>
+      <article><h3>Custo de LLM por agente</h3><p>Uma chave de API por agente para custo atribuível, auditoria de modelo e cache em todos os fluxos ativos.</p></article>
+      <article><h3>Operação com IA</h3><p>n8n e Make conectados ao Claude Code por MCP para auditar, testar e corrigir workflows com histórico de cada mudança.</p></article>
+    </div>
+  </section>
+
+  <section class="block">
+    <p class="eyebrow">Ferramentas</p>
+    <div class="stack">
+      <span>n8n</span><span>Make</span><span>OpenAI</span><span>DeepSeek</span><span>Gemini</span><span>Whisper</span>
+      <span>Postgres e pgvector</span><span>Redis</span><span>uazapi</span><span>Evolution API</span><span>WhatsApp Cloud API</span>
+      <span>ClickUp API</span><span>Google Sheets</span><span>Google Calendar</span><span>Asaas</span><span>Docker</span><span>Claude Code</span>
+    </div>
+  </section>
+
+  <footer>
+    <p>Nomes de clientes, workflows e dados de conversa ficam de fora por confidencialidade. Detalhes técnicos podem ser mostrados em entrevista.</p>
+  </footer>
+
+</div>
+
+</body>
+</html>
